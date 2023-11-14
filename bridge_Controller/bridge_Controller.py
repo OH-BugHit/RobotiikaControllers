@@ -57,6 +57,12 @@ def trolley_cmd(key):
     elif key == ord("D"):
         message = {'laite': -2, 'mene': 0}
         emitter_device.send(json.dumps(message))
+    elif key == ord("F"): #Kaapeli sisään
+        message = {'laite': -3, 'mene': 0}
+        emitter_device.send(json.dumps(message))
+    elif key == ord("V"): #Kaapeli ulos
+        message = {'laite': -4, 'mene': 0}
+        emitter_device.send(json.dumps(message))
 
 def bridge_cmd(key):
     if key == ord("W"): 

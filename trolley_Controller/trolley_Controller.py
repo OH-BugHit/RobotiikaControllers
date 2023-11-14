@@ -44,7 +44,7 @@ y = 0
 mene = 0
 
 def trolley_cmd(ohje):
-    if ohje == -1: 
+    if ohje == -1: # Trolleyn liikutus
         val1 = ds1.getValue()
         val2 = ds2.getValue()
         if (val1 < val2-0.2):
@@ -62,7 +62,7 @@ def trolley_cmd(ohje):
             trolleyMotorO2.setVelocity(-10.0)
             trolleyMotorV.setVelocity(-10.0)
             trolleyMotorV2.setVelocity(-10.0)
-    elif ohje == -2: 
+    elif ohje == -2: # Trolleyn liikutus
         val1 = ds1.getValue()
         val2 = ds2.getValue()
         print(val1,val2)
