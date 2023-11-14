@@ -11,7 +11,7 @@ with open('hallikartta.json') as tiedosto:
 from controller import Robot
 from controller import Keyboard
 from controller import Emitter
-from controller import Receiver
+#from controller import Receiver
 
 # create the Robot instance.
 robot = Robot()
@@ -22,12 +22,10 @@ timestep = int(robot.getBasicTimeStep())
 
 keyboard.enable(timestep)
 
-# You should insert a getDevice-like function in order to get the
-# instance of a device of the robot. Something like:
 emitter_device = robot.getDevice('bridgeEmitter')
 
-receiver_device = robot.getDevice('bridgeReceiver')
-receiver_device.enable(timestep)
+#receiver_device = robot.getDevice('bridgeReceiver')
+#receiver_device.enable(timestep)
 
 bridgeMotorO = robot.getDevice('bridgeMotorO')
 bridgeMotorV = robot.getDevice('bridgeMotorV')
@@ -141,14 +139,6 @@ def automatio(mene):
 # - perform simulation steps until Webots is stopping the controller
 while robot.step(timestep) != -1:
     key = keyboard.getKey()
-    
-    # trolleyn vastaus onko perillä työpisteessä
-    while receiver_device.getQueueLength() > 0:
-        data = receiver_device.getString()
-        trolleyVastaus = json.loads(data)
-        receiver_device.nextPacket()
-        trolleyBusy = trolleyVastaus["valmis"]
-            
     if key == ord("1"):
         mene = 1
         bridgeBusy = 1
@@ -167,9 +157,9 @@ while robot.step(timestep) != -1:
         bridgeMotorO.setVelocity(0.0)
         bridgeMotorV.setVelocity(0.0)
         trolley_cmd(key)
-    if (bridgeBusy == 0 and trolleyBusy == 0):
+    if (bridgeBusy == 0):
         mene = 0
-        # ONGELMA ON VASTAUKSESSA NYT CHANNEL ON VÄÄRÄ, VAIHDA SE 2
+        
     if (mene != 0): 
         bridgeBusy = automatio(mene)
         
