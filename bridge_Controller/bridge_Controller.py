@@ -1,10 +1,22 @@
 """bridge_Controller controller."""
 import json
 
+from queue import Queue
+
+q = Queue(maxsize=10)
+
+# Jono testi printtejä
+print (q.empty())
+q.put(12)
+print (q.empty())
+print(q.qsize())
+print(q.get())
+print(q.qsize())
+
 # Ladataan hallikartta...
 with open('hallikartta.json') as tiedosto:
     data = json.load(tiedosto)
-    print(data["tp1"]["x"])
+    print("Testataan tiedoston latausta hakemalla arvo tp1, x... :", data["tp1"]["x"])
     
 # You may need to import some classes of the controller module. Ex:
 #  from controller import Robot, Motor, DistanceSensor
@@ -124,7 +136,7 @@ def trolley_automation(y):
     message = {"laite": 0,'mene': y}
     emitter_device.send(json.dumps(message))
 
-def automatio(mene):
+def automaatio(mene):
         match mene:
             case 0:
                 return 0
@@ -145,16 +157,25 @@ def automatio(mene):
 # - perform simulation steps until Webots is stopping the controller
 while robot.step(timestep) != -1:
     key = keyboard.getKey()
-    if key == ord("1"):
+    if key == ord("1"): #Työpiste 1
         mene = 1
         bridgeBusy = 1
         trolleyBusy = 1
-    elif key == ord("2"):
+    elif key == ord("2"): #Työpiste 2
         mene = 2
         bridgeBusy = 1
         trolleyBusy = 1
-    elif key == ord("P"):
+    elif key == ord("3"): #Työpiste 3
+        mene = 3
+        bridgeBusy = 1
+        trolleyBusy = 1
+    elif key == ord("4"): #Työpiste 4
+        mene = 4
+        bridgeBusy = 1
+        trolleyBusy = 1
+    elif key == ord("P"): #Pysäytys!
         mene = 0
+        trolley_automation(0)
         bridgeBusy = 0
         trolleyBusy = 0
     elif key == ord("W") or key == ord("S"):
@@ -167,6 +188,6 @@ while robot.step(timestep) != -1:
         mene = 0
         
     if (mene != 0): 
-        bridgeBusy = automatio(mene)
+        bridgeBusy = automaatio(mene)
         
 # Enter here exit cleanup code.
