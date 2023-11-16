@@ -7,9 +7,11 @@ q = Queue(maxsize=10)
 
 # Jono testi printtejä
 print (q.empty())
-q.put(12)
+q.put(1)
+q.put(2)
+q.put(3)
 print (q.empty())
-print(q.qsize())
+print(q.get())
 print(q.get())
 print(q.qsize())
 
@@ -35,6 +37,7 @@ timestep = int(robot.getBasicTimeStep())
 keyboard.enable(timestep)
 
 emitter_device = robot.getDevice('bridgeEmitter')
+to_hook_emitter_device = robot.getDevice('bridge_to_hook_emitter')
 
 #receiver_device = robot.getDevice('bridgeReceiver')
 #receiver_device.enable(timestep)
@@ -189,5 +192,14 @@ while robot.step(timestep) != -1:
         
     if (mene != 0): 
         bridgeBusy = automaatio(mene)
+
+    if key == ord("F"): #Vaijeri sisään (koukku ylöspäin)
+        message = {"koukku_ohjaus": 2}
+        to_hook_emitter_device.send(json.dumps(message))
+
+    if key == ord("V"): #Vaijeri sisään (koukku ylöspäin)
+        message = {"koukku_ohjaus": 1}
+        to_hook_emitter_device.send(json.dumps(message))
+
         
 # Enter here exit cleanup code.
