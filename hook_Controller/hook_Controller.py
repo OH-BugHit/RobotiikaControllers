@@ -24,7 +24,9 @@ translation_field = vaijeri_solid.getField('translation')
 
 hook_pose = robot.getFromDef('koukku')
 hook_translation_field = hook_pose.getField('translation')
-#0.14
+#0.14 = koukun vaijerin (sylinterin) minimi height eli kun se on yläasennossa
+#5.3 on sit alaasento
+# tee tänne rajaarvot tonne kelaa funktioon
 height.setSFFloat(5.3) 
 
 def hook_cmd(ohje):
