@@ -17,6 +17,10 @@ timestep = int(robot.getBasicTimeStep())
 receiver_device = robot.getDevice('trolleyReceiver')
 receiver_device.enable(timestep)
 
+from_hook_receiver_device = robot.getDevice('hook_to_trolley_receiver')
+from_hook_receiver_device.enable(timestep)
+
+
 emitter_device = robot.getDevice('trolleyEmitter')
 
 trolleyMotorO = robot.getDevice('trolleyMotorO')
@@ -42,6 +46,7 @@ ds2.enable(timestep)
 
 y = 0
 mene = 0
+halt = 0
 
 def trolley_cmd(ohje):
     if ohje == -1: # Trolleyn liikutus
@@ -140,11 +145,16 @@ while robot.step(timestep) != -1:
             receiver_device.nextPacket()
             trolley_cmd(ohje["laite"])
             y = ohje["mene"]
+
+    while from_hook_receiver_device.getQueueLength() > 0:
+            data2 = from_hook_receiver_device.getString()
+            ohje2 = json.loads(data2)
+            from_hook_receiver_device.nextPacket()
+            halt = ohje2["halt"]
             
-    if (y != 0): 
+    if (y != 0 and halt < 1): 
         y = trolley_automation(y)
     
     # Lähetetään bridgelle ollaanko valmiina    
     message = {"valmis": y}
     emitter_device.send(json.dumps(message))
-# Enter here exit cleanup code.

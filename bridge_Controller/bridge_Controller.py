@@ -25,7 +25,7 @@ with open('hallikartta.json') as tiedosto:
 from controller import Robot
 from controller import Keyboard
 from controller import Emitter
-#from controller import Receiver
+from controller import Receiver
 
 # create the Robot instance.
 robot = Robot()
@@ -39,8 +39,8 @@ keyboard.enable(timestep)
 emitter_device = robot.getDevice('bridgeEmitter')
 to_hook_emitter_device = robot.getDevice('bridge_to_hook_emitter')
 
-#receiver_device = robot.getDevice('bridgeReceiver')
-#receiver_device.enable(timestep)
+receiver_device = robot.getDevice('from_hook_receiver')
+receiver_device.enable(timestep)
 
 bridgeMotorO = robot.getDevice('bridgeMotorO')
 bridgeMotorV = robot.getDevice('bridgeMotorV')
@@ -58,6 +58,7 @@ ds1.enable(timestep)
 ds2.enable(timestep)
 y = 0
 x = 0
+halt = 0
 mene = 0
 bridgeBusy = 0
 trolleyBusy = 0
@@ -159,6 +160,14 @@ def automaatio(mene):
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
 while robot.step(timestep) != -1:
+    # Otetaan vastaan koukun emitterin arvo
+    while receiver_device.getQueueLength() > 0:
+            vastaanotettuData = receiver_device.getString()
+            haltOhjaus = json.loads(vastaanotettuData)
+            receiver_device.nextPacket()
+            halt = haltOhjaus["halt"]
+
+    # Tarkistetaan näppäimistösyöte
     key = keyboard.getKey()
     if key == ord("1"): #Työpiste 1
         mene = 1
@@ -187,12 +196,17 @@ while robot.step(timestep) != -1:
         bridgeMotorO.setVelocity(0.0)
         bridgeMotorV.setVelocity(0.0)
         trolley_cmd(key)
+
     if (bridgeBusy == 0):
         mene = 0
-        
-    if (mene != 0): 
-        bridgeBusy = automaatio(mene)
 
+    if halt < 1:
+        if (mene != 0): 
+            bridgeBusy = automaatio(mene)
+    elif (bridgeBusy != 0):
+        message = {"koukku_ohjaus": 2}
+        to_hook_emitter_device.send(json.dumps(message))
+        
     if key == ord("F"): #Vaijeri sisään (koukku ylöspäin)
         message = {"koukku_ohjaus": 2}
         to_hook_emitter_device.send(json.dumps(message))
