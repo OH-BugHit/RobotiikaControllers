@@ -3,17 +3,8 @@ import json
 
 from queue import Queue
 
-q = Queue(maxsize=10)
-
-# Jono testi printtejä
-print (q.empty())
-q.put(1)
-q.put(2)
-q.put(3)
-print (q.empty())
-print(q.get())
-print(q.get())
-print(q.qsize())
+kutsu_jono = Queue()
+kutsu_setti = set()
 
 # Ladataan hallikartta...
 with open('hallikartta.json') as tiedosto:
@@ -62,15 +53,16 @@ halt = 0
 mene = 0
 bridgeBusy = 0
 trolleyBusy = 0
+kaytossa = 0
 
 #  motor = robot.getDevice('motorname')
 #  ds = robot.getDevice('dsname')
 #  ds.enable(timestep)
 def trolley_cmd(key):
-    if key == ord("A"):
+    if key == ord("A"): # trolley 'vasen'
         message = {'laite': -1, 'mene': 0}
         emitter_device.send(json.dumps(message))
-    elif key == ord("D"):
+    elif key == ord("D"): # trolley 'oikea'
         message = {'laite': -2, 'mene': 0}
         emitter_device.send(json.dumps(message))
     elif key == ord("F"): #Kaapeli sisään
@@ -81,7 +73,7 @@ def trolley_cmd(key):
         emitter_device.send(json.dumps(message))
 
 def bridge_cmd(key):
-    if key == ord("W"): 
+    if key == ord("W"): # Bridge 'eteen'
         val1 = ds1.getValue()
         val2 = ds2.getValue()
         print(val1,val2)
@@ -94,7 +86,7 @@ def bridge_cmd(key):
         else:
             bridgeMotorO.setVelocity(10.0)
             bridgeMotorV.setVelocity(10.0)
-    elif key == ord("S"): 
+    elif key == ord("S"): # Bridge 'taakse'
         val1 = ds1.getValue()
         val2 = ds2.getValue()
         if (val1 < val2-0.2):
@@ -139,7 +131,8 @@ def trolley_automation(y):
     message = {"laite": 0,'mene': y}
     emitter_device.send(json.dumps(message))
 
-def automaatio(mene):
+def automaatio(mene, kaytossa):
+    if kaytossa == 0:
         match mene:
             case 0:
                 return 0
@@ -156,11 +149,24 @@ def automaatio(mene):
                 trolley_automation(data["tp4"]["y"])
                 return bridge_automation(data["tp4"]["x"],mene)       
 
+def lisaa_jonoon(tyopiste): # Asetetaan jonoon työpisteen tarve nosturista
+    if tyopiste not in kutsu_setti:
+        kutsu_jono.put(tyopiste)
+        kutsu_setti.add(tyopiste)
+
+def ota_jonosta(): # Otetaan kutsujonosta seuraava työpiste
+    if kutsu_jono.empty():
+        return 0 # palauttaa 0 kun jono tyhjä. (Mene = 0)
+    seuraava = kutsu_jono.get()
+    kutsu_setti.remove(seuraava)
+    return seuraava
+
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
 while robot.step(timestep) != -1:
     # Otetaan vastaan koukun emitterin arvo
-    while receiver_device.getQueueLength() > 0:
+    print(kutsu_setti)
+    while receiver_device.getQueueLength() > 0: # Vastaanotetaan koukulta tietoa esteistä (pyynnöstä pysähtyä)
             vastaanotettuData = receiver_device.getString()
             haltOhjaus = json.loads(vastaanotettuData)
             receiver_device.nextPacket()
@@ -169,40 +175,46 @@ while robot.step(timestep) != -1:
     # Tarkistetaan näppäimistösyöte
     key = keyboard.getKey()
     if key == ord("1"): #Työpiste 1
-        mene = 1
-        bridgeBusy = 1
-        trolleyBusy = 1
+        lisaa_jonoon(1)
     elif key == ord("2"): #Työpiste 2
-        mene = 2
-        bridgeBusy = 1
-        trolleyBusy = 1
+        lisaa_jonoon(2)
     elif key == ord("3"): #Työpiste 3
-        mene = 3
-        bridgeBusy = 1
-        trolleyBusy = 1
+        lisaa_jonoon(3)
     elif key == ord("4"): #Työpiste 4
-        mene = 4
-        bridgeBusy = 1
-        trolleyBusy = 1
+        lisaa_jonoon(4)
     elif key == ord("P"): #Pysäytys!
+        kutsu_jono = Queue() # Tyhjennetään jono ja setti
+        kutsu_setti = set() # Odottamaton automaatio on estetty
         mene = 0
         trolley_automation(0)
         bridgeBusy = 0
         trolleyBusy = 0
-    elif key == ord("W") or key == ord("S"):
+    elif key == ord("W") or key == ord("S"): # Bridgen käsiohjaus
         bridge_cmd(key)
     else :
         bridgeMotorO.setVelocity(0.0)
         bridgeMotorV.setVelocity(0.0)
         trolley_cmd(key)
+    
+    if key == ord("R"): # Vapauta (release), työpisteen käytöltä mahdollisille seuraaville
+        kaytossa = 0
 
     if (bridgeBusy == 0):
-        mene = 0
+        if kaytossa != 1:
+            mene = ota_jonosta() # Mikäli automaatio on valmis, otetaan jonosta seuraava työpiste
+            if (mene != 0): # Jos jonossa oli jotain, asetetaan bridge ja trolley kiireiseksi
+                bridgeBusy = 1
+                trolleyBusy = 1
+            else: # Jos jono oli tyhjä, asetetaan bridge ja trolley odottamaan
+                bridgeBusy = 0
+                trolleyBusy = 0
 
     if halt < 1:
-        if (mene != 0): 
-            bridgeBusy = automaatio(mene)
-    elif (bridgeBusy != 0):
+        if (mene != 0):
+            bridgeBusy = automaatio(mene, kaytossa)
+            if bridgeBusy == 0:
+                kaytossa = 1
+    elif (bridgeBusy != 0): # Jos koukulta vastaanotettiin havainto esteestä, keskeytetään automaation suorittaminen ja pyydetään nostamaan koukkua
         message = {"koukku_ohjaus": 2}
         to_hook_emitter_device.send(json.dumps(message))
         
