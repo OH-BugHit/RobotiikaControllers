@@ -1,5 +1,6 @@
 """hook_Controller controller."""
 import json
+import time
 
 from controller import Supervisor
 from controller import Receiver
@@ -8,7 +9,6 @@ from controller import Emitter
 robot = Supervisor()
 
 timestep = int(robot.getBasicTimeStep())
-
 
 receiver_device = robot.getDevice('hookReceiver')
 receiver_device.enable(timestep)
@@ -25,7 +25,7 @@ ds3.enable(timestep)
 ds4.enable(timestep)
 
 # koukku_node = robot.getFromDef('koukkuRobotti')
-
+go_time = 0
 
 vaijeri = robot.getFromDef('vaijeri')
 height = vaijeri.getField('height')
@@ -67,12 +67,12 @@ def kelaa(suunta):
             height.setSFFloat(nykyinen_korkeus-arvo)  #Height pienenee (vaijeri lyhenee)
 
 while robot.step(timestep) != -1:
-      print(ds1.getValue() + ds2.getValue() + ds3.getValue() + ds4.getValue())
       if ds1.getValue() + ds2.getValue() + ds3.getValue() + ds4.getValue() < 4000:
             # Pysähdy jos huomataan
+            go_time = time.time() + 0.1
             message = {"halt": 1}
             emitter_device.send(json.dumps(message))
-      else:
+      elif go_time < time.time():
             # Saa liikkua automaatiolla
             message = {"halt": 0}
             emitter_device.send(json.dumps(message))

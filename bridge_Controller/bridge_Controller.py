@@ -110,7 +110,6 @@ def bridge_cmd(key):
 def bridge_automation(x,mene):
     val1 = ds1.getValue()
     val2 = ds2.getValue()
-    print(val1)
     if (val1 + 0.1 > x and val1 < x):
         return 0
     elif (x < val1):
