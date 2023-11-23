@@ -76,7 +76,6 @@ def bridge_cmd(key):
     if key == ord("W"): # Bridge 'eteen'
         val1 = ds1.getValue()
         val2 = ds2.getValue()
-        print(val1,val2)
         if (val1 > val2-0.2):
             bridgeMotorO.setVelocity(10.0)
             bridgeMotorV.setVelocity(5.0)
@@ -165,7 +164,6 @@ def ota_jonosta(): # Otetaan kutsujonosta seuraava työpiste
 # - perform simulation steps until Webots is stopping the controller
 while robot.step(timestep) != -1:
     # Otetaan vastaan koukun emitterin arvo
-    print(kutsu_setti)
     while receiver_device.getQueueLength() > 0: # Vastaanotetaan koukulta tietoa esteistä (pyynnöstä pysähtyä)
             vastaanotettuData = receiver_device.getString()
             haltOhjaus = json.loads(vastaanotettuData)

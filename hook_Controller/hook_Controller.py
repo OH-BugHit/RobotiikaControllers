@@ -13,16 +13,18 @@ timestep = int(robot.getBasicTimeStep())
 receiver_device = robot.getDevice('hookReceiver')
 receiver_device.enable(timestep)
 
+hookLidar = robot.getDevice('hookLidar')
+hookLidar.setPosition(float('+inf'))
+hookLidar.setVelocity(20.0)
+
+
 emitter_device = robot.getDevice('hookEmitter')
 
 ds1 = robot.getDevice('hookDs1')
 ds2 = robot.getDevice('hookDs2')
-ds3 = robot.getDevice('hookDs3')
-ds4 = robot.getDevice('hookDs4')
+
 ds1.enable(timestep)
 ds2.enable(timestep)
-ds3.enable(timestep)
-ds4.enable(timestep)
 
 # koukku_node = robot.getFromDef('koukkuRobotti')
 go_time = 0
@@ -67,7 +69,7 @@ def kelaa(suunta):
             height.setSFFloat(nykyinen_korkeus-arvo)  #Height pienenee (vaijeri lyhenee)
 
 while robot.step(timestep) != -1:
-      if ds1.getValue() + ds2.getValue() + ds3.getValue() + ds4.getValue() < 4000:
+      if ds1.getValue() < 1000 or ds2.getValue() < 1000:
             # Pysähdy jos huomataan
             go_time = time.time() + 0.1
             message = {"halt": 1}
