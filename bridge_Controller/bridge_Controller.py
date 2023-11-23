@@ -54,6 +54,7 @@ mene = 0
 bridgeBusy = 0
 trolleyBusy = 0
 kaytossa = 0
+tallennus = 0
 
 #  motor = robot.getDevice('motorname')
 #  ds = robot.getDevice('dsname')
@@ -172,14 +173,25 @@ while robot.step(timestep) != -1:
 
     # Tarkistetaan näppäimistösyöte
     key = keyboard.getKey()
+
+    if key == ord("O"):
+        if tallennus == 1:
+            tallennus = 0
+        else:
+            print("Tallenna työpiste painamalla haluttua numeroa...\nTai paina \"0\" poistuaksesi")
+            tallennus = 1
     if key == ord("1"): #Työpiste 1
-        lisaa_jonoon(1)
+        if tallennus == 0:
+            lisaa_jonoon(1)
     elif key == ord("2"): #Työpiste 2
-        lisaa_jonoon(2)
+        if tallennus == 0:
+            lisaa_jonoon(2)
     elif key == ord("3"): #Työpiste 3
-        lisaa_jonoon(3)
+        if tallennus == 0:
+            lisaa_jonoon(3)
     elif key == ord("4"): #Työpiste 4
-        lisaa_jonoon(4)
+        if tallennus == 0:
+            lisaa_jonoon(4)
     elif key == ord("P"): #Pysäytys!
         kutsu_jono = Queue() # Tyhjennetään jono ja setti
         kutsu_setti = set() # Odottamaton automaatio on estetty
