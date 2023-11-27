@@ -33,6 +33,9 @@ to_hook_emitter_device = robot.getDevice('bridge_to_hook_emitter')
 receiver_device = robot.getDevice('from_hook_receiver')
 receiver_device.enable(timestep)
 
+from_trolley_receiver = robot.getDevice('from_trolley_receiver')
+from_trolley_receiver.enable(timestep)
+
 bridgeMotorO = robot.getDevice('bridgeMotorO')
 bridgeMotorV = robot.getDevice('bridgeMotorV')
 
@@ -55,10 +58,22 @@ bridgeBusy = 0
 trolleyBusy = 0
 kaytossa = 0
 tallennus = 0
+trolley_sijainti = 0
 
 #  motor = robot.getDevice('motorname')
 #  ds = robot.getDevice('dsname')
 #  ds.enable(timestep)
+def tallenna(tyopiste,x,y):
+    tp = "tp"+str(tyopiste)
+    print (tp)
+    print("x sijainti on:",x)
+    print("Y sijainti on:",y)
+
+    data[tp]["x"] = x
+    data[tp]["y"] = y
+    with open("hallikartta.json", "w") as kirjoitettava:
+        json.dump(data, kirjoitettava)
+
 def trolley_cmd(key):
     if key == ord("A"): # trolley 'vasen'
         message = {'laite': -1, 'mene': 0}
@@ -165,6 +180,13 @@ def ota_jonosta(): # Otetaan kutsujonosta seuraava työpiste
 # - perform simulation steps until Webots is stopping the controller
 while robot.step(timestep) != -1:
     # Otetaan vastaan koukun emitterin arvo
+    
+    while from_trolley_receiver.getQueueLength() > 0: # Vastaanotetaan trolleyltä sijainti (y)
+            from_trolley_data = from_trolley_receiver.getString()
+            trolley_data = json.loads(from_trolley_data)
+            from_trolley_receiver.nextPacket()
+            trolley_sijainti = trolley_data["sijainti"]    
+    
     while receiver_device.getQueueLength() > 0: # Vastaanotetaan koukulta tietoa esteistä (pyynnöstä pysähtyä)
             vastaanotettuData = receiver_device.getString()
             haltOhjaus = json.loads(vastaanotettuData)
@@ -174,15 +196,22 @@ while robot.step(timestep) != -1:
     # Tarkistetaan näppäimistösyöte
     key = keyboard.getKey()
 
-    if key == ord("O"):
-        if tallennus == 1:
-            tallennus = 0
-        else:
-            print("Tallenna työpiste painamalla haluttua numeroa...\nTai paina \"0\" poistuaksesi")
+    if key == ord("O"): # Tallenna uusi työpiste painamalla tämän jälkeen sitten työpisteen numeroa
+        if tallennus == 0:
+            print("\nTallenna työpiste painamalla haluttua numeroa...\nTai paina \"L\" poistuaksesi")
             tallennus = 1
+    if key == ord("L") and tallennus == 1: # Lopetetaan tallennus
+        tallennus = 0
+        print("\nPoistuit tallennustilasta\n")
+
+
     if key == ord("1"): #Työpiste 1
         if tallennus == 0:
             lisaa_jonoon(1)
+        else:
+            print("Uusi sijainti tallennettu työpisteeseen 1")
+            tallenna(1,ds1.getValue(),trolley_sijainti)
+            tallennus = 0
     elif key == ord("2"): #Työpiste 2
         if tallennus == 0:
             lisaa_jonoon(2)

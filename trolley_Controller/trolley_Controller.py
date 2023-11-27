@@ -47,6 +47,7 @@ ds2.enable(timestep)
 y = 0
 mene = 0
 halt = 0
+sijainti = 0
 
 def trolley_cmd(ohje):
     if ohje == -1: # Trolleyn liikutus
@@ -89,7 +90,6 @@ def trolley_cmd(ohje):
 def trolley_automation(y):
     val1 = ds1.getValue()
     val2 = ds2.getValue()
-    print(val1)
     if (val1 + 0.1 > y and val1 < y):
         return 0
     elif (y < val1):
@@ -133,6 +133,7 @@ def trolley_automation(y):
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
 while robot.step(timestep) != -1:
+    sijainti = ds1.getValue()
     trolleyMotorO.setVelocity(0.0)
     trolleyMotorO2.setVelocity(0.0)
     trolleyMotorV.setVelocity(0.0)
@@ -154,6 +155,6 @@ while robot.step(timestep) != -1:
     if (y != 0 and halt < 1): 
         y = trolley_automation(y)
     
-    # Lähetetään bridgelle ollaanko valmiina    
-    message = {"valmis": y}
+     #Lähetetään bridgelle ollaanko valmiina    
+    message = {"sijainti": sijainti}
     emitter_device.send(json.dumps(message))
