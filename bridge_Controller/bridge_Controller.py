@@ -13,7 +13,6 @@ with open('hallikartta.json') as tiedosto:
     
 # You may need to import some classes of the controller module. Ex:
 #  from controller import Robot, Motor, DistanceSensor
-from controller import Robot # tän voi varmaan poistaa nyt
 from controller import Keyboard
 from controller import Emitter
 from controller import Receiver
@@ -37,11 +36,41 @@ receiver_device.enable(timestep)
 from_trolley_receiver = robot.getDevice('from_trolley_receiver')
 from_trolley_receiver.enable(timestep)
 
-
+#Työpisteiden kutsuttu-valo
+tyovalo1 = robot.getFromDef('tyovalo1')
+tyovalo2 = robot.getFromDef('tyovalo2')
+tyovalo3 = robot.getFromDef('tyovalo3')
+tyovalo4 = robot.getFromDef('tyovalo4')
 tyovalo5 = robot.getFromDef('tyovalo5')
+tyovalo6 = robot.getFromDef('tyovalo6')
+tyovalo7 = robot.getFromDef('tyovalo7')
+tyovalo8 = robot.getFromDef('tyovalo8')
+tyovalo9 = robot.getFromDef('tyovalo9')
+tyovaloV = robot.getFromDef('tyovalo_vapaa')
+tv1Valo = tyovalo1.getField('on')
+tv2Valo = tyovalo2.getField('on')
+tv3Valo = tyovalo3.getField('on')
+tv4Valo = tyovalo4.getField('on')
 tv5Valo = tyovalo5.getField('on')
+tv6Valo = tyovalo6.getField('on')
+tv7Valo = tyovalo7.getField('on')
+tv8Valo = tyovalo8.getField('on')
+tv9Valo = tyovalo9.getField('on')
+tvVihrValo = tyovaloV.getField('on')
+# Alustetaan kutsuvalot kiinni
+def nollaa_valot():
+    tv1Valo.setSFBool(False)
+    tv2Valo.setSFBool(False)
+    tv3Valo.setSFBool(False)
+    tv4Valo.setSFBool(False)
+    tv5Valo.setSFBool(False)
+    tv6Valo.setSFBool(False)
+    tv7Valo.setSFBool(False)
+    tv8Valo.setSFBool(False)
+    tv9Valo.setSFBool(False)
+    tvVihrValo.setSFBool(True)
 
-
+nollaa_valot()
 bridgeMotorO = robot.getDevice('bridgeMotorO')
 bridgeMotorV = robot.getDevice('bridgeMotorV')
 bridgeMotorO.setPosition(float('+inf'))
@@ -65,9 +94,7 @@ tallennus = 0
 trolley_sijainti = 0
 perilla = True
 
-#  motor = robot.getDevice('motorname')
-#  ds = robot.getDevice('dsname')
-#  ds.enable(timestep)
+# Funktiot
 def tallenna(tyopiste,x,y):
     tp = "tp"+str(tyopiste)
 
@@ -183,15 +210,37 @@ def automaatio(mene, kaytossa):
                 return bridge_automation(data["tp9"]["x"],mene)
 
 def lisaa_jonoon(tyopiste): # Asetetaan jonoon työpisteen tarve nosturista
+    tvVihrValo.setSFBool(False)
     if tyopiste not in kutsu_setti:
         kutsu_jono.put(tyopiste)
         kutsu_setti.add(tyopiste)
 
 def ota_jonosta(): # Otetaan kutsujonosta seuraava työpiste
     if kutsu_jono.empty():
+        tvVihrValo.setSFBool(True)
         return 0 # palauttaa 0 kun jono tyhjä. (Mene = 0)
+    
     seuraava = kutsu_jono.get()
     kutsu_setti.remove(seuraava)
+    match seuraava:
+        case 1:
+            tv1Valo.setSFBool(False)
+        case 2:
+            tv2Valo.setSFBool(False)
+        case 3:
+            tv3Valo.setSFBool(False)
+        case 4:
+            tv4Valo.setSFBool(False)
+        case 5:
+            tv5Valo.setSFBool(False)
+        case 6:
+            tv6Valo.setSFBool(False)
+        case 7:
+            tv7Valo.setSFBool(False)
+        case 8:
+            tv8Valo.setSFBool(False)
+        case 9:
+            tv9Valo.setSFBool(False)
     return seuraava
 
 # Main loop:
@@ -226,6 +275,7 @@ while robot.step(timestep) != -1:
     if key == ord("1"): #Työpiste 1
         if tallennus == 0:
             lisaa_jonoon(1)
+            tv1Valo.setSFBool(True)
         else:
             print("Uusi sijainti tallennettu työpisteeseen 1")
             tallenna(1,ds1.getValue(),trolley_sijainti)
@@ -233,6 +283,7 @@ while robot.step(timestep) != -1:
     elif key == ord("2"): #Työpiste 2
         if tallennus == 0:
             lisaa_jonoon(2)
+            tv2Valo.setSFBool(True)
         else:
             print("Uusi sijainti tallennettu työpisteeseen 2")
             tallenna(2, ds1.getValue(), trolley_sijainti)
@@ -240,6 +291,7 @@ while robot.step(timestep) != -1:
     elif key == ord("3"): #Työpiste 3
         if tallennus == 0:
             lisaa_jonoon(3)
+            tv3Valo.setSFBool(True)
         else:
             print("Uusi sijainti tallennettu työpisteeseen 3")
             tallenna(3, ds1.getValue(), trolley_sijainti)
@@ -247,6 +299,7 @@ while robot.step(timestep) != -1:
     elif key == ord("4"): #Työpiste 4
         if tallennus == 0:
             lisaa_jonoon(4)
+            tv4Valo.setSFBool(True)
         else:
             print("Uusi sijainti tallennettu työpisteeseen 4")
             tallenna(4, ds1.getValue(), trolley_sijainti)
@@ -262,6 +315,7 @@ while robot.step(timestep) != -1:
     elif key == ord("6"): #Työpiste 6
         if tallennus == 0:
             lisaa_jonoon(6)
+            tv6Valo.setSFBool(True)
         else:
             print("Uusi sijainti tallennettu työpisteeseen 6")
             tallenna(6, ds1.getValue(), trolley_sijainti)
@@ -269,6 +323,7 @@ while robot.step(timestep) != -1:
     elif key == ord("7"): #Työpiste 7
         if tallennus == 0:
             lisaa_jonoon(7)
+            tv7Valo.setSFBool(True)
         else:
             print("Uusi sijainti tallennettu työpisteeseen 7")
             tallenna(7, ds1.getValue(), trolley_sijainti)
@@ -276,6 +331,7 @@ while robot.step(timestep) != -1:
     elif key == ord("8"): #Työpiste 8
         if tallennus == 0:
             lisaa_jonoon(8)
+            tv8Valo.setSFBool(True)
         else:
             print("Uusi sijainti tallennettu työpisteeseen 8")
             tallenna(8, ds1.getValue(), trolley_sijainti)
@@ -283,6 +339,7 @@ while robot.step(timestep) != -1:
     elif key == ord("9"): #Työpiste 9
         if tallennus == 0:
             lisaa_jonoon(9)
+            tv9Valo.setSFBool(True)
         else:
             print("Uusi sijainti tallennettu työpisteeseen 9")
             tallenna(9, ds1.getValue(), trolley_sijainti)
@@ -290,6 +347,7 @@ while robot.step(timestep) != -1:
     elif key == ord("P"): #Pysäytys!
         kutsu_jono = Queue() # Tyhjennetään jono ja setti
         kutsu_setti = set() # Odottamaton automaatio on estetty
+        nollaa_valot()
         mene = 0
         trolley_automation(0)
         bridgeBusy = 0
