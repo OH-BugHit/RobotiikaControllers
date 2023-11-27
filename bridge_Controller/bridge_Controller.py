@@ -13,13 +13,14 @@ with open('hallikartta.json') as tiedosto:
     
 # You may need to import some classes of the controller module. Ex:
 #  from controller import Robot, Motor, DistanceSensor
-from controller import Robot
+from controller import Robot # tän voi varmaan poistaa nyt
 from controller import Keyboard
 from controller import Emitter
 from controller import Receiver
+from controller import Supervisor
 
 # create the Robot instance.
-robot = Robot()
+robot = Supervisor()
 keyboard = Keyboard()
 
 # get the time step of the current world.
@@ -36,10 +37,13 @@ receiver_device.enable(timestep)
 from_trolley_receiver = robot.getDevice('from_trolley_receiver')
 from_trolley_receiver.enable(timestep)
 
+
+tyovalo5 = robot.getFromDef('tyovalo5')
+tv5Valo = tyovalo5.getField('on')
+
+
 bridgeMotorO = robot.getDevice('bridgeMotorO')
 bridgeMotorV = robot.getDevice('bridgeMotorV')
-
-
 bridgeMotorO.setPosition(float('+inf'))
 bridgeMotorV.setPosition(float('+inf'))
 
@@ -59,20 +63,19 @@ trolleyBusy = 0
 kaytossa = 0
 tallennus = 0
 trolley_sijainti = 0
+perilla = True
 
 #  motor = robot.getDevice('motorname')
 #  ds = robot.getDevice('dsname')
 #  ds.enable(timestep)
 def tallenna(tyopiste,x,y):
     tp = "tp"+str(tyopiste)
-    print (tp)
-    print("x sijainti on:",x)
-    print("Y sijainti on:",y)
 
     data[tp]["x"] = x
     data[tp]["y"] = y
     with open("hallikartta.json", "w") as kirjoitettava:
         json.dump(data, kirjoitettava)
+    print("tallennettu työpiste", tp, " X:", data[tp]["x"], " Y: ", data[tp],["y"])
 
 def trolley_cmd(key):
     if key == ord("A"): # trolley 'vasen'
@@ -162,7 +165,22 @@ def automaatio(mene, kaytossa):
                 return bridge_automation(data["tp3"]["x"],mene)
             case 4:
                 trolley_automation(data["tp4"]["y"])
-                return bridge_automation(data["tp4"]["x"],mene)       
+                return bridge_automation(data["tp4"]["x"],mene)
+            case 5:
+                trolley_automation(data["tp5"]["y"])
+                return bridge_automation(data["tp5"]["x"],mene)
+            case 6:
+                trolley_automation(data["tp6"]["y"])                
+                return bridge_automation(data["tp6"]["x"],mene)
+            case 7:
+                trolley_automation(data["tp7"]["y"])
+                return bridge_automation(data["tp7"]["x"],mene)
+            case 8:
+                trolley_automation(data["tp8"]["y"])
+                return bridge_automation(data["tp8"]["x"],mene)
+            case 9:
+                trolley_automation(data["tp9"]["y"])
+                return bridge_automation(data["tp9"]["x"],mene)
 
 def lisaa_jonoon(tyopiste): # Asetetaan jonoon työpisteen tarve nosturista
     if tyopiste not in kutsu_setti:
@@ -196,6 +214,8 @@ while robot.step(timestep) != -1:
     # Tarkistetaan näppäimistösyöte
     key = keyboard.getKey()
 
+    if key == ord("T"):
+        print("Työkutsujonossa seuraavat työpisteet (ei järjestyksessä): ", kutsu_setti)
     if key == ord("O"): # Tallenna uusi työpiste painamalla tämän jälkeen sitten työpisteen numeroa
         if tallennus == 0:
             print("\nTallenna työpiste painamalla haluttua numeroa...\nTai paina \"L\" poistuaksesi")
@@ -203,8 +223,6 @@ while robot.step(timestep) != -1:
     if key == ord("L") and tallennus == 1: # Lopetetaan tallennus
         tallennus = 0
         print("\nPoistuit tallennustilasta\n")
-
-
     if key == ord("1"): #Työpiste 1
         if tallennus == 0:
             lisaa_jonoon(1)
@@ -215,12 +233,60 @@ while robot.step(timestep) != -1:
     elif key == ord("2"): #Työpiste 2
         if tallennus == 0:
             lisaa_jonoon(2)
+        else:
+            print("Uusi sijainti tallennettu työpisteeseen 2")
+            tallenna(2, ds1.getValue(), trolley_sijainti)
+            tallennus = 0
     elif key == ord("3"): #Työpiste 3
         if tallennus == 0:
             lisaa_jonoon(3)
+        else:
+            print("Uusi sijainti tallennettu työpisteeseen 3")
+            tallenna(3, ds1.getValue(), trolley_sijainti)
+            tallennus = 0
     elif key == ord("4"): #Työpiste 4
         if tallennus == 0:
             lisaa_jonoon(4)
+        else:
+            print("Uusi sijainti tallennettu työpisteeseen 4")
+            tallenna(4, ds1.getValue(), trolley_sijainti)
+            tallennus = 0
+    elif key == ord("5"): #Työpiste 5
+        if tallennus == 0:
+            lisaa_jonoon(5)
+            tv5Valo.setSFBool(True)
+        else:
+            print("Uusi sijainti tallennettu työpisteeseen 5")
+            tallenna(5, ds1.getValue(), trolley_sijainti)
+            tallennus = 0
+    elif key == ord("6"): #Työpiste 6
+        if tallennus == 0:
+            lisaa_jonoon(6)
+        else:
+            print("Uusi sijainti tallennettu työpisteeseen 6")
+            tallenna(6, ds1.getValue(), trolley_sijainti)
+            tallennus = 0
+    elif key == ord("7"): #Työpiste 7
+        if tallennus == 0:
+            lisaa_jonoon(7)
+        else:
+            print("Uusi sijainti tallennettu työpisteeseen 7")
+            tallenna(7, ds1.getValue(), trolley_sijainti)
+            tallennus = 0
+    elif key == ord("8"): #Työpiste 8
+        if tallennus == 0:
+            lisaa_jonoon(8)
+        else:
+            print("Uusi sijainti tallennettu työpisteeseen 8")
+            tallenna(8, ds1.getValue(), trolley_sijainti)
+            tallennus = 0
+    elif key == ord("9"): #Työpiste 9
+        if tallennus == 0:
+            lisaa_jonoon(9)
+        else:
+            print("Uusi sijainti tallennettu työpisteeseen 9")
+            tallenna(9, ds1.getValue(), trolley_sijainti)
+            tallennus = 0
     elif key == ord("P"): #Pysäytys!
         kutsu_jono = Queue() # Tyhjennetään jono ja setti
         kutsu_setti = set() # Odottamaton automaatio on estetty
@@ -242,6 +308,8 @@ while robot.step(timestep) != -1:
         if kaytossa != 1:
             mene = ota_jonosta() # Mikäli automaatio on valmis, otetaan jonosta seuraava työpiste
             if (mene != 0): # Jos jonossa oli jotain, asetetaan bridge ja trolley kiireiseksi
+                print("Automaatio käynnistyy!")
+                perilla = False
                 bridgeBusy = 1
                 trolleyBusy = 1
             else: # Jos jono oli tyhjä, asetetaan bridge ja trolley odottamaan
@@ -252,8 +320,9 @@ while robot.step(timestep) != -1:
         if (mene != 0):
             bridgeBusy = automaatio(mene, kaytossa)
             if bridgeBusy == 0:
+                perilla = True
                 kaytossa = 1
-    elif (bridgeBusy != 0): # Jos koukulta vastaanotettiin havainto esteestä, keskeytetään automaation suorittaminen ja pyydetään nostamaan koukkua
+    elif (bridgeBusy != 0 and kaytossa == 0 and not perilla): # Jos koukulta vastaanotettiin havainto esteestä, keskeytetään automaation suorittaminen ja pyydetään nostamaan koukkua
         message = {"koukku_ohjaus": 2}
         to_hook_emitter_device.send(json.dumps(message))
         
