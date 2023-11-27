@@ -359,7 +359,7 @@ while robot.step(timestep) != -1:
         bridgeMotorV.setVelocity(0.0)
         trolley_cmd(key)
     
-    if key == ord("R"): # Vapauta (release), työpisteen käytöltä mahdollisille seuraaville
+    if key == ord("R") and perilla: # Vapauta (release), työpisteen käytöltä mahdollisille seuraaville
         kaytossa = 0
 
     if (bridgeBusy == 0):
