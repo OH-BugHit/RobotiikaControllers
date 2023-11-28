@@ -23,7 +23,7 @@ robot = Supervisor()
 keyboard = Keyboard()
 
 # get the time step of the current world.
-timestep = int(robot.getBasicTimeStep())
+timestep = int(robot.getBasicTimeStep()) # Default 32, nyt 24
 
 keyboard.enable(timestep)
 
@@ -57,8 +57,8 @@ tv7Valo = tyovalo7.getField('on')
 tv8Valo = tyovalo8.getField('on')
 tv9Valo = tyovalo9.getField('on')
 tvVihrValo = tyovaloV.getField('on')
-# Alustetaan kutsuvalot kiinni
-def nollaa_valot():
+
+def nollaa_valot(): # Kutsuvalojen lähtötilanne kun jono tyhjä
     tv1Valo.setSFBool(False)
     tv2Valo.setSFBool(False)
     tv3Valo.setSFBool(False)
@@ -70,7 +70,6 @@ def nollaa_valot():
     tv9Valo.setSFBool(False)
     tvVihrValo.setSFBool(True)
 
-nollaa_valot()
 bridgeMotorO = robot.getDevice('bridgeMotorO')
 bridgeMotorV = robot.getDevice('bridgeMotorV')
 bridgeMotorO.setPosition(float('+inf'))
@@ -93,11 +92,20 @@ kaytossa = 0
 tallennus = 0
 trolley_sijainti = 0
 perilla = True
+nollaa_valot()
 
 # Funktiot
 def tallenna(tyopiste,x,y):
     tp = "tp"+str(tyopiste)
-
+# 194 on max value ettei törmää bridgeen 13.7: #
+    if y < 13.71:
+        y = 13.75
+    if y > 193.99:
+        y = 193.25
+    if x < 4.62:
+        x = 4.8
+    if x > 194.7:
+        x = 193.9
     data[tp]["x"] = x
     data[tp]["y"] = y
     with open("hallikartta.json", "w") as kirjoitettava:
@@ -122,31 +130,41 @@ def bridge_cmd(key):
     if key == ord("W"): # Bridge 'eteen'
         val1 = ds1.getValue()
         val2 = ds2.getValue()
-        if (val1 > val2-0.2):
-            bridgeMotorO.setVelocity(10.0)
-            bridgeMotorV.setVelocity(5.0)
-        elif (val2 > val1-0.2):
-            bridgeMotorO.setVelocity(5.0)
-            bridgeMotorV.setVelocity(10.0)
+        print(val1)
+        if val1 > 4.62: # Kiskon pää
+            if (val1 > val2-0.2):
+                bridgeMotorO.setVelocity(10.0)
+                bridgeMotorV.setVelocity(5.0)
+            elif (val2 > val1-0.2):
+                bridgeMotorO.setVelocity(5.0)
+                bridgeMotorV.setVelocity(10.0)
+            else:
+                bridgeMotorO.setVelocity(10.0)
+                bridgeMotorV.setVelocity(10.0)
         else:
-            bridgeMotorO.setVelocity(10.0)
-            bridgeMotorV.setVelocity(10.0)
+            bridgeMotorO.setVelocity(0.0)
+            bridgeMotorV.setVelocity(0.0)
     elif key == ord("S"): # Bridge 'taakse'
         val1 = ds1.getValue()
         val2 = ds2.getValue()
-        if (val1 < val2-0.2):
-            bridgeMotorO.setVelocity(-10.0)
-            bridgeMotorV.setVelocity(-5.0)
-        elif (val2 < val1-0.2):
-            bridgeMotorO.setVelocity(-5.0)
-            bridgeMotorV.setVelocity(-10.0)
+        if val1 < 194.7: # Kiskon pää
+            if (val1 < val2-0.2):
+                bridgeMotorO.setVelocity(-10.0)
+                bridgeMotorV.setVelocity(-5.0)
+            elif (val2 < val1-0.2):
+                bridgeMotorO.setVelocity(-5.0)
+                bridgeMotorV.setVelocity(-10.0)
+            else:
+                bridgeMotorO.setVelocity(-10.0)
+                bridgeMotorV.setVelocity(-10.0)
         else:
-            bridgeMotorO.setVelocity(-10.0)
-            bridgeMotorV.setVelocity(-10.0)
+            bridgeMotorO.setVelocity(0.0)
+            bridgeMotorV.setVelocity(0.0)
 
 def bridge_automation(x,mene):
     val1 = ds1.getValue()
     val2 = ds2.getValue()
+    print(val1)
     if (val1 + 0.1 > x and val1 < x):
         return 0
     elif (x < val1):
@@ -260,10 +278,13 @@ while robot.step(timestep) != -1:
             receiver_device.nextPacket()
             halt = haltOhjaus["halt"]
 
+    #if trolley_sijainti+0.1 > y > trolley_sijainti-0.1:
+    #    trolleyBusy = 0
+
     # Tarkistetaan näppäimistösyöte
     key = keyboard.getKey()
 
-    if key == ord("T"):
+    if key == ord("T"): # Työkutsujonon printti
         print("Työkutsujonossa seuraavat työpisteet (ei järjestyksessä): ", kutsu_setti)
     if key == ord("O"): # Tallenna uusi työpiste painamalla tämän jälkeen sitten työpisteen numeroa
         if tallennus == 0:
@@ -358,7 +379,6 @@ while robot.step(timestep) != -1:
         bridgeMotorO.setVelocity(0.0)
         bridgeMotorV.setVelocity(0.0)
         trolley_cmd(key)
-    
     if key == ord("R") and perilla: # Vapauta (release), työpisteen käytöltä mahdollisille seuraaville
         kaytossa = 0
 
@@ -380,7 +400,7 @@ while robot.step(timestep) != -1:
             if bridgeBusy == 0:
                 perilla = True
                 kaytossa = 1
-    elif (bridgeBusy != 0 and kaytossa == 0 and not perilla): # Jos koukulta vastaanotettiin havainto esteestä, keskeytetään automaation suorittaminen ja pyydetään nostamaan koukkua
+    elif bridgeBusy != 0 and kaytossa == 0 and not perilla: # Jos koukulta vastaanotettiin havainto esteestä, keskeytetään automaation suorittaminen ja pyydetään nostamaan koukkua
         message = {"koukku_ohjaus": 2}
         to_hook_emitter_device.send(json.dumps(message))
         

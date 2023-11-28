@@ -53,39 +53,52 @@ def trolley_cmd(ohje):
     if ohje == -1: # Trolleyn liikutus
         val1 = ds1.getValue()
         val2 = ds2.getValue()
-        if (val1 < val2-0.2):
-            trolleyMotorO.setVelocity(-12.0)
-            trolleyMotorO2.setVelocity(-12.0)
-            trolleyMotorV.setVelocity(-16.0)
-            trolleyMotorV2.setVelocity(-16.0)
-        elif (val2 > val1-0.2):
-            trolleyMotorO.setVelocity(-16.0)
-            trolleyMotorO2.setVelocity(-16.0)
-            trolleyMotorV.setVelocity(-12.0)
-            trolleyMotorV2.setVelocity(-12.0)
+        # 194 on max value ettei törmää bridgeen
+        if val1 < 194:
+            if (val1 < val2-0.2):
+                trolleyMotorO.setVelocity(-12.0)
+                trolleyMotorO2.setVelocity(-12.0)
+                trolleyMotorV.setVelocity(-16.0)
+                trolleyMotorV2.setVelocity(-16.0)
+            elif (val2 > val1-0.2):
+                trolleyMotorO.setVelocity(-16.0)
+                trolleyMotorO2.setVelocity(-16.0)
+                trolleyMotorV.setVelocity(-12.0)
+                trolleyMotorV2.setVelocity(-12.0)
+            else:
+                trolleyMotorO.setVelocity(-16.0)
+                trolleyMotorO2.setVelocity(-16.0)
+                trolleyMotorV.setVelocity(-16.0)
+                trolleyMotorV2.setVelocity(-16.0)
         else:
-            trolleyMotorO.setVelocity(-16.0)
-            trolleyMotorO2.setVelocity(-16.0)
-            trolleyMotorV.setVelocity(-16.0)
-            trolleyMotorV2.setVelocity(-16.0)
+            trolleyMotorO.setVelocity(0)
+            trolleyMotorO2.setVelocity(0)
+            trolleyMotorV.setVelocity(0)
+            trolleyMotorV2.setVelocity(0)
     elif ohje == -2: # Trolleyn liikutus
         val1 = ds1.getValue()
         val2 = ds2.getValue()
-        if (val1 < val2-0.2):
-            trolleyMotorO.setVelocity(12.0)
-            trolleyMotorO2.setVelocity(12.0)
-            trolleyMotorV.setVelocity(16.0)
-            trolleyMotorV2.setVelocity(16.0)
-        elif (val2 < val1-0.2):
-            trolleyMotorO.setVelocity(16.0)
-            trolleyMotorO2.setVelocity(16.0)
-            trolleyMotorV.setVelocity(12.0)
-            trolleyMotorV2.setVelocity(12.0)
+        if val1 > 13.7: # 13.7 on min value ettei törmää bridgeen
+            if (val1 < val2-0.2):
+                trolleyMotorO.setVelocity(12.0)
+                trolleyMotorO2.setVelocity(12.0)
+                trolleyMotorV.setVelocity(16.0)
+                trolleyMotorV2.setVelocity(16.0)
+            elif (val2 < val1-0.2):
+                trolleyMotorO.setVelocity(16.0)
+                trolleyMotorO2.setVelocity(16.0)
+                trolleyMotorV.setVelocity(12.0)
+                trolleyMotorV2.setVelocity(12.0)
+            else:
+                trolleyMotorO.setVelocity(16.0)
+                trolleyMotorO2.setVelocity(16.0)
+                trolleyMotorV.setVelocity(16.0)
+                trolleyMotorV2.setVelocity(16.0)
         else:
-            trolleyMotorO.setVelocity(16.0)
-            trolleyMotorO2.setVelocity(16.0)
-            trolleyMotorV.setVelocity(16.0)
-            trolleyMotorV2.setVelocity(16.0)
+            trolleyMotorO.setVelocity(0)
+            trolleyMotorO2.setVelocity(0)
+            trolleyMotorV.setVelocity(0)
+            trolleyMotorV2.setVelocity(0)
 
 def trolley_automation(y):
     val1 = ds1.getValue()
