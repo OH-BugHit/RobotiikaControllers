@@ -277,10 +277,6 @@ while robot.step(timestep) != -1:
             haltOhjaus = json.loads(vastaanotettuData)
             receiver_device.nextPacket()
             halt = haltOhjaus["halt"]
-
-    #if trolley_sijainti+0.1 > y > trolley_sijainti-0.1:
-    #    trolleyBusy = 0
-
     # Tarkistetaan näppäimistösyöte
     key = keyboard.getKey()
 
@@ -403,14 +399,10 @@ while robot.step(timestep) != -1:
     elif bridgeBusy != 0 and kaytossa == 0 and not perilla: # Jos koukulta vastaanotettiin havainto esteestä, keskeytetään automaation suorittaminen ja pyydetään nostamaan koukkua
         message = {"koukku_ohjaus": 2}
         to_hook_emitter_device.send(json.dumps(message))
-        
+
     if key == ord("F"): #Vaijeri sisään (koukku ylöspäin)
         message = {"koukku_ohjaus": 2}
         to_hook_emitter_device.send(json.dumps(message))
-
     if key == ord("V"): #Vaijeri sisään (koukku ylöspäin)
         message = {"koukku_ohjaus": 1}
         to_hook_emitter_device.send(json.dumps(message))
-
-        
-# Enter here exit cleanup code.
