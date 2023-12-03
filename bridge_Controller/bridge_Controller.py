@@ -88,7 +88,7 @@ halt = 0
 mene = 0
 bridgeBusy = 0
 trolleyBusy = 0
-kaytossa = 0
+kaytossa = 1
 tallennus = 0
 trolley_sijainti = 0
 perilla = True
@@ -164,7 +164,6 @@ def bridge_cmd(key):
 def bridge_automation(x,mene):
     val1 = ds1.getValue()
     val2 = ds2.getValue()
-    print(val1)
     if (val1 + 0.1 > x and val1 < x):
         return 0
     elif (x < val1):
@@ -261,6 +260,8 @@ def ota_jonosta(): # Otetaan kutsujonosta seuraava työpiste
             tv9Valo.setSFBool(False)
     return seuraava
 
+# Welcome
+print("Hi and welcome to use Group2 Automated Overhead Crane!\n Use 'W' and 'S' to control the Bridge\n Use 'A' and 'D' to control the Trolley\n Use 'F' and 'V' to control the height of the hook\n Use 'O' + number 1-9 to save new working station\n Use numbers 1-9 to move to saved working station\n Use 'T' to print the queue (not in order)\n Use 'R' to release the crane for automation\n Use 'P' for emergency stop!\n")
 # Main loop:
 # - perform simulation steps until Webots is stopping the controller
 while robot.step(timestep) != -1:
@@ -271,7 +272,6 @@ while robot.step(timestep) != -1:
             trolley_data = json.loads(from_trolley_data)
             from_trolley_receiver.nextPacket()
             trolley_sijainti = trolley_data["sijainti"]    
-    
     while receiver_device.getQueueLength() > 0: # Vastaanotetaan koukulta tietoa esteistä (pyynnöstä pysähtyä)
             vastaanotettuData = receiver_device.getString()
             haltOhjaus = json.loads(vastaanotettuData)
@@ -403,6 +403,6 @@ while robot.step(timestep) != -1:
     if key == ord("F"): #Vaijeri sisään (koukku ylöspäin)
         message = {"koukku_ohjaus": 2}
         to_hook_emitter_device.send(json.dumps(message))
-    if key == ord("V"): #Vaijeri sisään (koukku ylöspäin)
+    if key == ord("V"): #Vaijeri ulos (koukku alaspäin)
         message = {"koukku_ohjaus": 1}
         to_hook_emitter_device.send(json.dumps(message))
